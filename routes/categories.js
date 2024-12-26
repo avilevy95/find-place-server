@@ -24,19 +24,28 @@ router.get('/', async (req, res) => {
     }
   });
   
-router.post('/', async (req, res) => {
-  try {
-    const { name, searchTerms } = req.body;
-
-    const category = new Category({ name, searchTerms });
-    await category.save();
-
-    await updateVersion('categories'); 
-    res.status(201).json({ message: 'Category added' });
-  } catch (err) {
-    console.error('Error adding category:', err);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+  router.post('/', async (req, res) => {
+    try {
+      const categories = req.body.categories; // הנח שהלקוח שולח מערך של קטגוריות
+  
+      if (!Array.isArray(categories) || categories.length === 0) {
+        return res.status(400).json({ error: 'Invalid input: categories must be a non-empty array' });
+      }
+  
+      const categoryDocuments = categories.map(({ name, searchTerms }) => ({
+        name,
+        searchTerms,
+      }));
+  
+      await Category.insertMany(categoryDocuments); // הוספת כל הקטגוריות במכה אחת
+  
+      await updateVersion('categories');
+      res.status(201).json({ message: `${categories.length} categories added` });
+    } catch (err) {
+      console.error('Error adding categories:', err);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+  
 
 export default router;

@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import placesRoutes from './routes/places.js';
 import authRoutes from './routes/auth.js';
+import feedbackRoutes from './routes/feedback.js';
 import { authenticateToken } from './middleware/auth.js';
 import categoriesRoutes from './routes/categories.js';
 
@@ -27,7 +28,7 @@ app.get('/', (req, res) => {
 app.use('/places',authenticateToken, placesRoutes);
 app.use('/auth', authRoutes);
 app.use('/categories', authenticateToken, categoriesRoutes);
-
+app.use('/feedback',authenticateToken, feedbackRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

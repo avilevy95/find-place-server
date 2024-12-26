@@ -109,6 +109,18 @@ const metadataSchema = new mongoose.Schema({
   version: { type: String, required: true }, // גרסה נוכחית
 });
 
+
+// ============== Feedback Schema ==============
+
+const FeedbackSchema = new mongoose.Schema({
+  userName: { type: String, required: true },
+  feedback: { type: String, required: true },
+  date: { type: Date, default: Date.now },
+});
+
+
+
+export const Feedback = mongoose.model('Feedback', FeedbackSchema);
 export const Metadata = mongoose.model('Metadata', metadataSchema);
 export const User = mongoose.model('User', userSchema);
 export const Place = mongoose.model('Place', placeSchema);

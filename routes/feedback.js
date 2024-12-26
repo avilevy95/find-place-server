@@ -15,8 +15,8 @@ const transporter = nodemailer.createTransport({
 
 // ניתוב לקבלת משוב
 router.post('/', async (req, res) => {
-  const { feedback } = req.body;
-  const userName = req.user.userName;
+  const { feedback ,userName} = req.body;
+  
 
   if (!feedback) return res.status(400).json({ error: 'Feedback is required' });
 

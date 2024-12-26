@@ -1,6 +1,5 @@
 import express from 'express';
 import {Feedback} from '../models/database.js';
-import { authenticateToken } from '../middleware/auth.js';
 import nodemailer from 'nodemailer';
 
 const router = express.Router();
@@ -9,13 +8,13 @@ const router = express.Router();
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER, // כתובת האימייל שלך
-    pass: process.env.EMAIL_PASS, // סיסמת האימייל שלך
+    user: process.env.EMAIL_USER, 
+    pass: process.env.EMAIL_PASS, 
   },
 });
 
 // ניתוב לקבלת משוב
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', async (req, res) => {
   const { feedback } = req.body;
   const userName = req.user.userName;
 

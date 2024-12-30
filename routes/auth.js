@@ -6,7 +6,7 @@ import { User } from '../models/database.js';
 
 const router = express.Router();
 
-const generateAccessToken = (payload) => jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30s' });
+const generateAccessToken = (payload) => jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '100d' });
 const generateRefreshToken = (payload) => jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
 
 // הרשמה
@@ -49,15 +49,13 @@ router.post('/login', async (req, res) => {
 // רענון טוקן
 router.post('/token', async (req, res) => {
   const { token } = req.body;
-  console.log("token: ",token);
-
+  
   if (!token) return res.status(401).json({ error: 'Refresh Token required' });
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
     const user = await User.findById(decoded.id);
     if (!user || user.refreshToken !== token) {
-      console.log("user.refreshToken: ",user.refreshToken); 
       return res.status(403).json({ error: 'Invalid Refresh Token' });
     }
 

@@ -14,6 +14,7 @@ const upload = multer({ storage });
 router.post('/', upload.array('screenshots'), async (req, res) => {
   const { feedback, userName } = req.body;
   const screenshots = req.files;
+  console.log(screenshots);
 
   if (!feedback) {
     return res.status(400).json({ error: 'Feedback is required' });

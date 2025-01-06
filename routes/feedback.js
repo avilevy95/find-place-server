@@ -1,7 +1,7 @@
 import express from 'express';
 import { Feedback } from '../models/database.js';
 import sharp from 'sharp';
-import { verifyAdmin } from '../middleware/auth.js';
+import { verifyAdmin } from '../middleware/verifyAdmin.js';
 const router = express.Router();
 
 // ניתוב לקבלת פידבק
@@ -49,3 +49,24 @@ router.get('/',verifyAdmin, async (req, res) => {
     res.status(500).json({ error: 'Failed to retrieve feedbacks' });
   }
 });
+
+
+router.delete('/:id', verifyAdmin, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const deletedFeedback = await Feedback.findByIdAndDelete(id);
+
+    if (!deletedFeedback) {
+      return res.status(404).json({ error: 'Feedback not found' });
+    }
+
+    res.status(200).json({ message: 'Feedback deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting feedback:', err);
+    res.status(500).json({ error: 'Failed to delete feedback' });
+  }
+});
+
+
+export default router;

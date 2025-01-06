@@ -121,7 +121,7 @@ const feedbackSchema = new mongoose.Schema({
 });
 
 
-export const Feedback = mongoose.model('Feedback', FeedbackSchema);
+export const Feedback = mongoose.model('Feedback', feedbackSchema);
 export const Metadata = mongoose.model('Metadata', metadataSchema);
 export const User = mongoose.model('User', userSchema);
 export const Place = mongoose.model('Place', placeSchema);

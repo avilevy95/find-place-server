@@ -15,7 +15,7 @@ async function findNearbyPlaces(category, lat, lng, radius) {
   // אפשר גם לחפש לפי googleCategory במקום userCategories, תלוי בלוגיקה
   return Place.find({
     userCategories: category,         // מחפשים מקומות שמערך userCategories כולל את המחרוזת הזו
-    updated_at: { $gte: cutoffTime },
+   // updated_at: { $gte: cutoffTime },
     location: {
       $nearSphere: {
         $geometry: {
@@ -36,7 +36,6 @@ router.get('/', async (req, res) => {
     const { category, lat, lng, radius } = req.query;
     const latNum = parseFloat(lat);
     const lngNum = parseFloat(lng);
-    // אם radius מגיע בק"מ, נכפיל ב-1000
     const radNum = 5000;//parseInt(radius, 10); // במטרים או בקילומטרים, תלוי בהחלטה שלך
 
    // console.log('Query Params:', { category, lat: latNum, lng: lngNum, radius: radNum });

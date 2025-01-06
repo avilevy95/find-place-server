@@ -1,39 +1,36 @@
 import express from 'express';
-import {Feedback} from '../models/database.js';
-import nodemailer from 'nodemailer';
-
+import { Feedback } from '../models/database.js';
+import sharp from 'sharp';
+import { verifyAdmin } from '../middleware/auth.js';
 const router = express.Router();
 
-// הגדרות Nodemailer
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER, 
-    pass: process.env.EMAIL_PASS, 
-  },
-});
-
-// ניתוב לקבלת משוב
+// ניתוב לקבלת פידבק
 router.post('/', async (req, res) => {
-  const { feedback ,userName} = req.body;
-  
+  const { feedback, userName, screenshot } = req.body; 
 
   if (!feedback) return res.status(400).json({ error: 'Feedback is required' });
 
   try {
-    // שמירת המשוב ב-DB
-    const newFeedback = new Feedback({ userName, feedback });
+    let compressedScreenshot = null;
+
+    if (screenshot) {
+      const buffer = Buffer.from(screenshot.split(',')[1], 'base64');
+      
+      // דחיסת התמונה
+      compressedScreenshot = await sharp(buffer)
+        .resize(800) 
+        .jpeg({ quality: 70 }) 
+        .toBuffer();
+    }
+
+    const newFeedback = new Feedback({
+      userName,
+      feedback,
+      screenshot: compressedScreenshot, 
+      date: new Date(),
+    });
+
     await newFeedback.save();
-
-    // שליחת האימייל
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: process.env.ADMIN_EMAIL, // כתובת האימייל שאליו יישלח המשוב
-      subject: 'Feedback Received',
-      text: `User: ${userName}\nFeedback: ${feedback}`,
-    };
-
-    await transporter.sendMail(mailOptions);
 
     res.status(201).json({ message: 'Feedback submitted successfully' });
   } catch (err) {
@@ -42,4 +39,13 @@ router.post('/', async (req, res) => {
   }
 });
 
-export default router;
+
+router.get('/',verifyAdmin, async (req, res) => {
+  try {
+    const feedbacks = await Feedback.find(); 
+    res.status(200).json(feedbacks);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to retrieve feedbacks' });
+  }
+});

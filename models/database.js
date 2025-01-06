@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String },
   googleId: { type: String },
+  isAdmin: { type: Boolean, default: false },
   refreshToken: { type: String },
   preferences: {
     vegetarian: { type: Boolean, default: false },
@@ -112,12 +113,12 @@ const metadataSchema = new mongoose.Schema({
 
 // ============== Feedback Schema ==============
 
-const FeedbackSchema = new mongoose.Schema({
+const feedbackSchema = new mongoose.Schema({
   userName: { type: String, required: true },
   feedback: { type: String, required: true },
-  date: { type: Date, default: Date.now },
+  screenshot: { type: Buffer, default: null }, 
+  createdAt: { type: Date, default: Date.now },
 });
-
 
 
 export const Feedback = mongoose.model('Feedback', FeedbackSchema);

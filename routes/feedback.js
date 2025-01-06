@@ -6,30 +6,37 @@ import { verifyAdmin } from '../middleware/verifyAdmin.js';
 
 const router = express.Router();
 
-// הגדרת multer לשמירה זמנית בזיכרון
+// הגדרת multer לשמירה בזיכרון
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-router.post('/', upload.single('screenshot'), async (req, res) => {
+// ניתוב להוספת פידבק
+router.post('/', upload.array('screenshots'), async (req, res) => {
   const { feedback, userName } = req.body;
-  const screenshotFile = req.file; // הקובץ מתוך ה־form-data
+  const screenshots = req.files;
 
-  if (!feedback) return res.status(400).json({ error: 'Feedback is required' });
+  if (!feedback) {
+    return res.status(400).json({ error: 'Feedback is required' });
+  }
 
   try {
-    let compressedScreenshot = null;
+    const compressedScreenshots = [];
 
-    if (screenshotFile) {
-      compressedScreenshot = await sharp(screenshotFile.buffer)
-        .resize(800) // שינוי גודל ל־800 פיקסלים
-        .jpeg({ quality: 70 }) // שמירה בפורמט JPEG עם דחיסה
-        .toBuffer();
+    if (screenshots && screenshots.length > 0) {
+      for (const screenshot of screenshots) {
+        const compressed = await sharp(screenshot.buffer)
+          .resize(800) // שינוי גודל ל־800 פיקסלים
+          .jpeg({ quality: 70 }) // דחיסה
+          .toBuffer();
+
+        compressedScreenshots.push(compressed);
+      }
     }
 
     const newFeedback = new Feedback({
       userName,
       feedback,
-      screenshot: compressedScreenshot, // שמירת התמונה בבסיס הנתונים
+      screenshots: compressedScreenshots, // שמירת התמונות הדחוסות
       date: new Date(),
     });
 
@@ -42,18 +49,29 @@ router.post('/', upload.single('screenshot'), async (req, res) => {
   }
 });
 
-
-router.get('/',verifyAdmin, async (req, res) => {
+// ניתוב לשליפת כל הפידבקים (מנהל בלבד)
+router.get('/', verifyAdmin, async (req, res) => {
   try {
-    const feedbacks = await Feedback.find(); 
-    res.status(200).json(feedbacks);
+    const feedbacks = await Feedback.find();
+
+    const feedbacksWithImages = feedbacks.map((feedback) => ({
+      id: feedback._id,
+      userName: feedback.userName,
+      feedback: feedback.feedback,
+      date: feedback.date,
+      screenshots: feedback.screenshots.map((buffer) =>
+        `data:image/jpeg;base64,${buffer.toString('base64')}`
+      ), // המרה ל-Base64 לשליחה ללקוח
+    }));
+
+    res.status(200).json(feedbacksWithImages);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to retrieve feedbacks' });
   }
 });
 
-
+// ניתוב למחיקת פידבק לפי ID
 router.delete('/:id', verifyAdmin, async (req, res) => {
   const { id } = req.params;
 
@@ -70,6 +88,5 @@ router.delete('/:id', verifyAdmin, async (req, res) => {
     res.status(500).json({ error: 'Failed to delete feedback' });
   }
 });
-
 
 export default router;

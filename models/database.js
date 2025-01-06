@@ -116,7 +116,7 @@ const metadataSchema = new mongoose.Schema({
 const feedbackSchema = new mongoose.Schema({
   userName: { type: String, required: true },
   feedback: { type: String, required: true },
-  screenshot: { type: [Buffer], default: null }, 
+  screenshots: { type: [Buffer], default: null }, 
   createdAt: { type: Date, default: Date.now },
 });
 

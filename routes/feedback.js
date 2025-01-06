@@ -1,32 +1,35 @@
 import express from 'express';
 import { Feedback } from '../models/database.js';
 import sharp from 'sharp';
+import multer from 'multer';
 import { verifyAdmin } from '../middleware/verifyAdmin.js';
+
 const router = express.Router();
 
-// ניתוב לקבלת פידבק
-router.post('/', async (req, res) => {
-  const { feedback, userName, screenshot } = req.body; 
+// הגדרת multer לשמירה זמנית בזיכרון
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+router.post('/', upload.single('screenshot'), async (req, res) => {
+  const { feedback, userName } = req.body;
+  const screenshotFile = req.file; // הקובץ מתוך ה־form-data
 
   if (!feedback) return res.status(400).json({ error: 'Feedback is required' });
 
   try {
     let compressedScreenshot = null;
 
-    if (screenshot) {
-      const buffer = Buffer.from(screenshot.split(',')[1], 'base64');
-      
-      // דחיסת התמונה
-      compressedScreenshot = await sharp(buffer)
-        .resize(800) 
-        .jpeg({ quality: 70 }) 
+    if (screenshotFile) {
+      compressedScreenshot = await sharp(screenshotFile.buffer)
+        .resize(800) // שינוי גודל ל־800 פיקסלים
+        .jpeg({ quality: 70 }) // שמירה בפורמט JPEG עם דחיסה
         .toBuffer();
     }
 
     const newFeedback = new Feedback({
       userName,
       feedback,
-      screenshot: compressedScreenshot, 
+      screenshot: compressedScreenshot, // שמירת התמונה בבסיס הנתונים
       date: new Date(),
     });
 

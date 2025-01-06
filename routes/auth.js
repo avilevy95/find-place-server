@@ -39,7 +39,7 @@ router.post('/login', async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
     const userName = user.name;
-    res.json({ accessToken, refreshToken ,userName});
+    res.json({ accessToken, refreshToken ,userName, isAdmin: user.isAdmin });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error logging in' });

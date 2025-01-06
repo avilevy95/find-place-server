@@ -34,10 +34,11 @@ router.post('/', upload.array('screenshots'), async (req, res) => {
       }
     }
 
+    console.log('Compressed screenshots:', compressedScreenshots);
     const newFeedback = new Feedback({
       userName,
       feedback,
-      screenshots: compressedScreenshots, // שמירת התמונות הדחוסות
+      screenshots: compressedScreenshots, 
       date: new Date(),
     });
 

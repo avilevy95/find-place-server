@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
         return res.status(204).send(); // אין צורך בעדכון
       }
   
-      const categories = await Category.find({}, 'name');
+      const categories = await Category.find({}, 'name').sort({ name: 1 });
       res.json({ version: currentVersion, categories });
     } catch (err) {
       console.error('Error fetching categories:', err);
